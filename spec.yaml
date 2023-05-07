@@ -3,7 +3,7 @@ fabric:
   - "ca1.hospitalone.org"
   - "ca1.researcher.org"
   peers: 
-  - "admin.hospitalone.com"
+  - "admin.hospitalone.org"
   - "admin.researcher.org"
   orderers:
   - "orderer1.orderers"
