@@ -149,9 +149,6 @@ func (t *MarblesPrivateChaincode) initMarble(stub shim.ChaincodeStubInterface, a
 	marble := &marble{
 		ObjectType: "marble",
 		RecordID:       marbleInput.RecordID,
-		DataLabel:      marbleInput.DataLabel,
-		Cholesterol:       marbleInput.Cholesterol,
-		Owner:      marbleInput.Owner,
 	}
 	marbleJSONasBytes, err := json.Marshal(marble)
 	if err != nil {
