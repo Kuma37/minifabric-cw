@@ -22,16 +22,16 @@ type MarblesPrivateChaincode struct {
 
 type marble struct {
 	ObjectType string `json:"docType"` //docType is used to distinguish the various types of objects in state database
-	RecordID       string `json:"recordid"`    //the fieldtags are needed to keep case from bouncing around
+	RecordID   string `json:"recordid"`
+	Owner	string `json:"owner"`    //the fieldtags are needed to keep case from bouncing around
 }
 
 type marblePrivateDetails struct {
-	ObjectType string `json:"docType"` //docType is used to distinguish the various types of objects in state database
-	RecordID       string `json:"recordid"`    //the fieldtags are needed to keep case from bouncing around
-	DataLabel      string `json:"datalabel"`
-	Cholesterol       string    `json:"cholesterol"`
-	Owner      string `json:"owner"`
-	BloodPressure      string   `json:"bloodpressure"`
+	ObjectType    string `json:"docType"` //docType is used to distinguish the various types of objects in state database
+	RecordID      string `json:"recordid"`    //the fieldtags are needed to keep case from bouncing around
+	DataLabel     string `json:"datalabel"`
+	Cholesterol   string `json:"cholesterol"`
+	BloodPressure string `json:"bloodpressure"`
 }
 
 // Init initializes chaincode
@@ -87,10 +87,10 @@ func (t *MarblesPrivateChaincode) initMarble(stub shim.ChaincodeStubInterface, a
 
 	type marbleTransientInput struct {
 		RecordID  string `json:"recordid"` //the fieldtags are needed to keep case from bouncing around
-		DataLabel string `json:"datalabel"`
-		Cholesterol  string    `json:"cholesterol"`
 		Owner string `json:"owner"`
-		BloodPressure string    `json:"bloodpressure"`
+		DataLabel string `json:"datalabel"`
+		Cholesterol  string `json:"cholesterol"`
+		BloodPressure string `json:"bloodpressure"`
 	}
 
 	// ==== Input sanitation ====
@@ -121,19 +121,19 @@ func (t *MarblesPrivateChaincode) initMarble(stub shim.ChaincodeStubInterface, a
 	}
 
 	if len(marbleInput.RecordID) == 0 {
-		return shim.Error("name field must be a non-empty string")
+		return shim.Error("recordid field must be a non-empty string")
 	}
 	if len(marbleInput.DataLabel) == 0 {
-		return shim.Error("color field must be a non-empty string")
+		return shim.Error("datalabel field must be a non-empty string")
 	}
 	if marbleInput.Cholesterol == 0 {
-		return shim.Error("size field must be a positive integer")
+		return shim.Error("cholesterol must be a non-empty string")
 	}
 	if len(marbleInput.Owner) == 0 {
 		return shim.Error("owner field must be a non-empty string")
 	}
 	if marbleInput.BloodPressure == 0 {
-		return shim.Error("price field must be a positive integer")
+		return shim.Error("bloodpressure field must be a non-empty string")
 	}
 
 	// ==== Check if marble already exists ====
@@ -148,7 +148,8 @@ func (t *MarblesPrivateChaincode) initMarble(stub shim.ChaincodeStubInterface, a
 	// ==== Create marble object and marshal to JSON ====
 	marble := &marble{
 		ObjectType: "marble",
-		RecordID:       marbleInput.RecordID,
+		RecordID:	marbleInput.RecordID,
+		Owner:	marbleInput.Owner,
 	}
 	marbleJSONasBytes, err := json.Marshal(marble)
 	if err != nil {
@@ -164,8 +165,10 @@ func (t *MarblesPrivateChaincode) initMarble(stub shim.ChaincodeStubInterface, a
 	// ==== Create marble private details object with price, marshal to JSON, and save to state ====
 	marblePrivateDetails := &marblePrivateDetails{
 		ObjectType: "marblePrivateDetails",
-		RecordID:       marbleInput.RecordID,
-		BloodPressure:      marbleInput.BloodPressure,
+		RecordID:	marbleInput.RecordID,
+		DataLabel:	marbleInput.DataLabel,
+		Cholesterol:  marbleInput.Cholesterol,
+		BloodPressure:	marbleInput.BloodPressure,
 	}
 	marblePrivateDetailsBytes, err := json.Marshal(marblePrivateDetails)
 	if err != nil {
@@ -179,9 +182,9 @@ func (t *MarblesPrivateChaincode) initMarble(stub shim.ChaincodeStubInterface, a
 	//  ==== Index the marble to enable color-based range queries, e.g. return all blue marbles ====
 	//  An 'index' is a normal key/value entry in state.
 	//  The key is a composite key, with the elements that you want to range query on listed first.
-	//  In our case, the composite key is based on indexName~color~name.
+	//  In our case, the composite key is based on indexName~datalabel~recordid.
 	//  This will enable very efficient state range queries based on composite keys matching indexName~color~*
-	indexName := "color~name"
+	indexName := "datalabel~recordid"
 	colorNameIndexKey, err := stub.CreateCompositeKey(indexName, []string{marble.DataLabel, marble.RecordID})
 	if err != nil {
 		return shim.Error(err.Error())
@@ -330,7 +333,7 @@ func (t *MarblesPrivateChaincode) delete(stub shim.ChaincodeStubInterface, args 
 		return shim.Error("name field must be a non-empty string")
 	}
 
-	// to maintain the color~name index, we need to read the marble first and get its color
+	// to maintain the datalabel~recordid index, we need to read the marble first and get its color
 	valAsbytes, err := stub.GetPrivateData("collectionMarbles", marbleDeleteInput.RecordID) //get the marble from chaincode state
 	if err != nil {
 		return shim.Error("Failed to get state for " + marbleDeleteInput.RecordID)
@@ -350,8 +353,8 @@ func (t *MarblesPrivateChaincode) delete(stub shim.ChaincodeStubInterface, args 
 		return shim.Error("Failed to delete state:" + err.Error())
 	}
 
-	// Also delete the marble from the color~name index
-	indexName := "color~name"
+	// Also delete the marble from the datalabel~recordid index
+	indexName := "datalabel~recordid"
 	colorNameIndexKey, err := stub.CreateCompositeKey(indexName, []string{marbleToDelete.DataLabel, marbleToDelete.RecordID})
 	if err != nil {
 		return shim.Error(err.Error())
@@ -407,7 +410,7 @@ func (t *MarblesPrivateChaincode) transferMarble(stub shim.ChaincodeStubInterfac
 	}
 
 	if len(marbleTransferInput.RecordID) == 0 {
-		return shim.Error("name field must be a non-empty string")
+		return shim.Error("recordid field must be a non-empty string")
 	}
 	if len(marbleTransferInput.Owner) == 0 {
 		return shim.Error("owner field must be a non-empty string")
@@ -448,50 +451,50 @@ func (t *MarblesPrivateChaincode) transferMarble(stub shim.ChaincodeStubInterfac
 // time and commit time.
 // Therefore, range queries are a safe option for performing update transactions based on query results.
 // ===========================================================================================
-func (t *MarblesPrivateChaincode) getMarblesByRange(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+// func (t *MarblesPrivateChaincode) getMarblesByRange(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 
-	if len(args) < 2 {
-		return shim.Error("Incorrect number of arguments. Expecting 2")
-	}
+// 	if len(args) < 2 {
+// 		return shim.Error("Incorrect number of arguments. Expecting 2")
+// 	}
 
-	startKey := args[0]
-	endKey := args[1]
+// 	startKey := args[0]
+// 	endKey := args[1]
 
-	resultsIterator, err := stub.GetPrivateDataByRange("collectionMarbles", startKey, endKey)
-	if err != nil {
-		return shim.Error(err.Error())
-	}
-	defer resultsIterator.Close()
+// 	resultsIterator, err := stub.GetPrivateDataByRange("collectionMarbles", startKey, endKey)
+// 	if err != nil {
+// 		return shim.Error(err.Error())
+// 	}
+// 	defer resultsIterator.Close()
 
-	// buffer is a JSON array containing QueryResults
-	var buffer bytes.Buffer
-	buffer.WriteString("[")
+// 	// buffer is a JSON array containing QueryResults
+// 	var buffer bytes.Buffer
+// 	buffer.WriteString("[")
 
-	bArrayMemberAlreadyWritten := false
-	for resultsIterator.HasNext() {
-		queryResponse, err := resultsIterator.Next()
-		if err != nil {
-			return shim.Error(err.Error())
-		}
-		// Add a comma before array members, suppress it for the first array member
-		if bArrayMemberAlreadyWritten {
-			buffer.WriteString(",")
-		}
+// 	bArrayMemberAlreadyWritten := false
+// 	for resultsIterator.HasNext() {
+// 		queryResponse, err := resultsIterator.Next()
+// 		if err != nil {
+// 			return shim.Error(err.Error())
+// 		}
+// 		// Add a comma before array members, suppress it for the first array member
+// 		if bArrayMemberAlreadyWritten {
+// 			buffer.WriteString(",")
+// 		}
 
-		buffer.WriteString(
-			fmt.Sprintf(
-				`{"Key":"%s", "Record":%s}`,
-				queryResponse.Key, queryResponse.Value,
-			),
-		)
-		bArrayMemberAlreadyWritten = true
-	}
-	buffer.WriteString("]")
+// 		buffer.WriteString(
+// 			fmt.Sprintf(
+// 				`{"Key":"%s", "Record":%s}`,
+// 				queryResponse.Key, queryResponse.Value,
+// 			),
+// 		)
+// 		bArrayMemberAlreadyWritten = true
+// 	}
+// 	buffer.WriteString("]")
 
-	fmt.Printf("- getMarblesByRange queryResult:\n%s\n", buffer.String())
+// 	fmt.Printf("- getMarblesByRange queryResult:\n%s\n", buffer.String())
 
-	return shim.Success(buffer.Bytes())
-}
+// 	return shim.Success(buffer.Bytes())
+// }
 
 func main() {
 	err := shim.Start(&MarblesPrivateChaincode{})
