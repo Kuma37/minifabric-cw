@@ -1,0 +1,18 @@
+[
+{
+    "name": "collectionMarbles",
+    "policy": "OR( 'hospitalone-org.member', 'researcher-org.member' )",
+    "requiredPeerCount": 0,
+    "maxPeerCount": 3,
+    "blockToLive":1000000,
+    "memberOnlyRead": true
+ },
+ {
+    "name": "collectionMarblePrivateDetails",
+    "policy": "OR( 'hospitalone-org.member' )",
+    "requiredPeerCount": 0,
+    "maxPeerCount": 3,
+    "blockToLive":3,
+    "memberOnlyRead": true
+ }
+]
