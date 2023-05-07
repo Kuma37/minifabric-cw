@@ -1,16 +1,14 @@
 fabric:
   cas:
-  - "ca1.org0.example.com"
-  - "ca1.org1.example.com"
+  - "ca1.hospitalone.org"
+  - "ca1.researcher.org"
   peers: 
-  - "peer1.org0.example.com"
-  - "peer2.org0.example.com"
-  - "peer1.org1.example.com"
-  - "peer2.org1.example.com"
+  - "admin.hospitalone.com"
+  - "admin.researcher.org"
   orderers:
-  - "orderer1.example.com"
-  - "orderer2.example.com"
-  - "orderer3.example.com"
+  - "orderer1.orderers"
+  - "orderer2.orderers"
+  - "orderer3.orderers"
   settings:
     ca:
       FABRIC_LOGGING_SPEC: DEBUG
