@@ -330,7 +330,7 @@ func (t *MarblesPrivateChaincode) delete(stub shim.ChaincodeStubInterface, args 
 	}
 
 	if len(marbleDeleteInput.RecordID) == 0 {
-		return shim.Error("name field must be a non-empty string")
+		return shim.Error("recordid field must be a non-empty string")
 	}
 
 	// to maintain the datalabel~recordid index, we need to read the marble first and get its color
