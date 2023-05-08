@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package main
 
 import (
-	"bytes"
+	// "bytes"
 	"encoding/json"
 	"fmt"
         "os"
@@ -64,15 +64,15 @@ func (t *MarblesPrivateChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Re
 	case "delete":
 		//delete a marble
 		return t.delete(stub, args)
-	case "getMarblesByRange":
-		//get marbles based on range query
-		return t.getMarblesByRange(stub, args)
-	case "getMarbleHash":
-		// get private data hash for collectionMarbles
-		return t.getMarbleHash(stub, args)
-	case "getMarblePrivateDetailsHash":
-		// get private data hash for collectionMarblePrivateDetails
-		return t.getMarblePrivateDetailsHash(stub, args)
+	// case "getMarblesByRange":
+	// 	//get marbles based on range query
+	// 	return t.getMarblesByRange(stub, args)
+	// case "getMarbleHash":
+	// 	// get private data hash for collectionMarbles
+	// 	return t.getMarbleHash(stub, args)
+	// case "getMarblePrivateDetailsHash":
+	// 	// get private data hash for collectionMarblePrivateDetails
+	// 	return t.getMarblePrivateDetailsHash(stub, args)
 	default:
 		//error
 		fmt.Println("invoke did not find func: " + function)
@@ -152,6 +152,7 @@ func (t *MarblesPrivateChaincode) initMarble(stub shim.ChaincodeStubInterface, a
 		ObjectType: "marble",
 		RecordID:	marbleInput.RecordID,
 		Owner:	marbleInput.Owner,
+		Sex: marbleInput.Sex,
 	}
 	marbleJSONasBytes, err := json.Marshal(marble)
 	if err != nil {
