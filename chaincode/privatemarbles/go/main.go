@@ -299,7 +299,7 @@ func (t *MarblesPrivateChaincode) readMarblePrivateDetails(stub shim.ChaincodeSt
 // }
 
 // ==================================================
-// delete - remove a marble key/value pair from state
+// delete -  remove a marble key/value pair from state
 // ==================================================
 func (t *MarblesPrivateChaincode) delete(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	fmt.Println("- start delete marble")

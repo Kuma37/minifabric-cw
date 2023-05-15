@@ -1,4 +1,4 @@
-# Minifabric
+## Minifabric
 Minifabric is a tool to let you setup a Fabric network, expand your network, install and upgrade your own chaincode, invoke transactions, inspect your ledger, change the configuration of your channel. By going through these tasks using Minifabric, you can gain tremendous skills and a complete understanding of Hyperledger Fabric.
 
 It currently provides the following functions:
