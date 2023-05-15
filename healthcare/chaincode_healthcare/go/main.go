@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package main
 
 import (
-	"bytes"
+	// "bytes"
 	"encoding/json"
 	"fmt"
         "os"
@@ -24,6 +24,7 @@ type marble struct {
 	ObjectType string `json:"docType"` //docType is used to distinguish the various types of objects in state database
 	RecordID   string `json:"recordid"`
 	Owner	string `json:"owner"`    //the fieldtags are needed to keep case from bouncing around
+	Sex string `json:"sex`
 }
 
 type marblePrivateDetails struct {
@@ -63,15 +64,15 @@ func (t *MarblesPrivateChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Re
 	case "delete":
 		//delete a marble
 		return t.delete(stub, args)
-	case "getMarblesByRange":
-		//get marbles based on range query
-		return t.getMarblesByRange(stub, args)
-	case "getMarbleHash":
-		// get private data hash for collectionMarbles
-		return t.getMarbleHash(stub, args)
-	case "getMarblePrivateDetailsHash":
-		// get private data hash for collectionMarblePrivateDetails
-		return t.getMarblePrivateDetailsHash(stub, args)
+	// case "getMarblesByRange":
+	// 	//get marbles based on range query
+	// 	return t.getMarblesByRange(stub, args)
+	// case "getMarbleHash":
+	// 	// get private data hash for collectionMarbles
+	// 	return t.getMarbleHash(stub, args)
+	// case "getMarblePrivateDetailsHash":
+	// 	// get private data hash for collectionMarblePrivateDetails
+	// 	return t.getMarblePrivateDetailsHash(stub, args)
 	default:
 		//error
 		fmt.Println("invoke did not find func: " + function)
@@ -89,6 +90,7 @@ func (t *MarblesPrivateChaincode) initMarble(stub shim.ChaincodeStubInterface, a
 		RecordID  string `json:"recordid"` //the fieldtags are needed to keep case from bouncing around
 		Owner string `json:"owner"`
 		DataLabel string `json:"datalabel"`
+		Sex string `json:"sex`
 		Cholesterol  string `json:"cholesterol"`
 		BloodPressure string `json:"bloodpressure"`
 	}
@@ -126,13 +128,13 @@ func (t *MarblesPrivateChaincode) initMarble(stub shim.ChaincodeStubInterface, a
 	if len(marbleInput.DataLabel) == 0 {
 		return shim.Error("datalabel field must be a non-empty string")
 	}
-	if marbleInput.Cholesterol == 0 {
+	if len(marbleInput.Cholesterol) == 0 {
 		return shim.Error("cholesterol must be a non-empty string")
 	}
 	if len(marbleInput.Owner) == 0 {
 		return shim.Error("owner field must be a non-empty string")
 	}
-	if marbleInput.BloodPressure == 0 {
+	if len(marbleInput.BloodPressure) == 0 {
 		return shim.Error("bloodpressure field must be a non-empty string")
 	}
 
@@ -150,6 +152,7 @@ func (t *MarblesPrivateChaincode) initMarble(stub shim.ChaincodeStubInterface, a
 		ObjectType: "marble",
 		RecordID:	marbleInput.RecordID,
 		Owner:	marbleInput.Owner,
+		Sex: marbleInput.Sex,
 	}
 	marbleJSONasBytes, err := json.Marshal(marble)
 	if err != nil {
@@ -184,8 +187,8 @@ func (t *MarblesPrivateChaincode) initMarble(stub shim.ChaincodeStubInterface, a
 	//  The key is a composite key, with the elements that you want to range query on listed first.
 	//  In our case, the composite key is based on indexName~datalabel~recordid.
 	//  This will enable very efficient state range queries based on composite keys matching indexName~color~*
-	indexName := "datalabel~recordid"
-	colorNameIndexKey, err := stub.CreateCompositeKey(indexName, []string{marble.DataLabel, marble.RecordID})
+	indexName := "sex~recordid"
+	colorNameIndexKey, err := stub.CreateCompositeKey(indexName, []string{marble.Sex, marble.RecordID})
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -354,8 +357,8 @@ func (t *MarblesPrivateChaincode) delete(stub shim.ChaincodeStubInterface, args 
 	}
 
 	// Also delete the marble from the datalabel~recordid index
-	indexName := "datalabel~recordid"
-	colorNameIndexKey, err := stub.CreateCompositeKey(indexName, []string{marbleToDelete.DataLabel, marbleToDelete.RecordID})
+	indexName := "sex~recordid"
+	colorNameIndexKey, err := stub.CreateCompositeKey(indexName, []string{marbleToDelete.Sex, marbleToDelete.RecordID})
 	if err != nil {
 		return shim.Error(err.Error())
 	}
